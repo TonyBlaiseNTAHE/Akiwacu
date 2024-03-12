@@ -1,0 +1,26 @@
+    
+    
+def setUp(self):
+        """Initialize database"""
+        self.app = app.test_client()
+        with app.app_context():
+            db.create_all()
+
+    def tearDown(self):
+        """Remove database session"""
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
+
+    def test_user_subscription_relationship(self):
+        """Test user-subscription relationship"""
+        user = User(username='test_user', email='test@example.com', password='123tony')
+        subscription = Subscription(name='test_subscription', price=9.99)
+        user.subscription = subscription
+        with app.app_context():
+            db.session.add(user)
+            db.session.commit()
+            saved_user = User.query.filter_by(username='test_user').first()
+            self.assertIsNotNone(saved_user)
+            self.assertEqual(saved_user.subscription.name, 'test_subscription')
+            self.assertEqual(saved_user.subscription.price, 9.99)
